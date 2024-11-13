@@ -1,104 +1,88 @@
-### Developed by:Sriram S
-### Reg no:212222240105
-### Date:
+# DEVELOPER NAME:Sriram S
+# REG NO:212222240105
+# DATE : 
 # Ex.No: 1B                     CONVERSION OF NON STATIONARY TO STATIONARY DATA
-# Date: 
+ 
 
 ### AIM:
-To perform regular differncing,seasonal adjustment and log transformatio on international mulgrave river data
+To perform regular differncing,seasonal adjustment and log transformatio on student performance data
 ### ALGORITHM:
-1. Import the required packages like pandas and numpy
-2. Read the data using the pandas
-3. Perform the data preprocessing if needed and apply regular differncing,seasonal adjustment,log transformation.
-4. Plot the data according to need, before and after regular differncing,seasonal adjustment,log transformation.
-5. Display the overall results.
-3. Perform the Augmented Dickey-Fuller test on the original series.
-4. Resample the data monthly, difference it again, and decompose it into seasonal components.
-5. Remove the seasonal component and plot the seasonally adjusted series.
-6. Apply a log transformation to the seasonally adjusted data and plot it.
+```
+1.Import the required packages like pandas and numpy
+2.Read the data using the pandas
+3.To remove any potential trends in the data
+4.This step is applied if the data shows varying variance
+5.If the data contains seasonality, subtract a rolling mean
+6.Finally, check if the variables are stationary using the Augmented Dickey-Fuller (ADF) test
+7.Display the overall results.
+```
+
 ### PROGRAM:
-
-
 ```
 import pandas as pd
-import numpy as np
+df = pd.read_csv('student_performance.csv')
+df.head()
+print(df.head())
+
 import matplotlib.pyplot as plt
-from statsmodels.tsa.seasonal import seasonal_decompose
-from statsmodels.tsa.stattools import adfuller
-df = pd.read_csv('/content/mulgrave.csv')
-df
-numeric_df = df.select_dtypes(include=[np.number])
-numeric_df = numeric_df.dropna()
-plt.figure(figsize=(10, 6))
-numeric_df.plot()
-plt.title('Original Non-Stationary Data')
+
+df[['Attendance', 'StudyHours', 'PreviousGrade', 'FinalGrade']].plot(subplots=True, layout=(2, 2), figsize=(10, 8), title='Student Performance Metrics')
 plt.show()
-df_diff = numeric_df.diff().dropna()
-plt.figure(figsize=(10, 6))
-df_diff.plot()
-plt.title('Data after Regular Differencing')
-plt.show()
-from statsmodels.tsa.seasonal import seasonal_decompose
-
-# Print the column names to check if 'datetime' exists
-print(numeric_df.columns)
-
-# Create a new column with the date information
-numeric_df['datetime'] = pd.date_range(start='2022-01-01', periods=len(numeric_df), freq='D')
-
-# Print the column names again to check if 'datetime' exists
-print(numeric_df.columns)
-
-# Set the 'datetime' column as the index
-numeric_df.set_index('datetime', inplace=True)
-
-# Specify the period of the time series data
-period = 12  # For example, if the data is monthly
-
-# Apply seasonal adjustment (e.g., using STL decomposition) to each column
-for col in numeric_df.columns:
-    decomposition = seasonal_decompose(numeric_df[col], model='additive', period=period)
-    df_sa = decomposition.trend
-    print(f"Seasonal decomposition for column {col}:")
-    print(df_sa)
-plt.figure(figsize=(10, 6))
-df_sa.plot()
-plt.title('Data after Seasonal Adjustment')
-plt.show()
-df_log = np.log(numeric_df)
-plt.figure(figsize=(10, 6))
-df_log.plot()
-plt.title('Data after Log Transformation')
-plt.show()
-print("Original Data:")
-print(numeric_df.describe())
-print("\nData after Regular Differencing:")
-print(df_diff.describe())
-print("\nData after Seasonal Adjustment:")
-print(df_sa.describe())
-print("\nData after Log Transformation:")
-print(df_log.describe())
 ```
+
+### differencing
+```
+df['Attendance_diff'] = df['Attendance'].diff().dropna()
+df['StudyHours_diff'] = df['StudyHours'].diff().dropna()
+df['PreviousGrade_diff'] = df['PreviousGrade'].diff().dropna()
+df['FinalGrade_diff'] = df['FinalGrade'].diff().dropna()
+
+
+df[['Attendance_diff', 'StudyHours_diff', 'PreviousGrade_diff', 'FinalGrade_diff']].plot(subplots=True, layout=(2, 2), figsize=(10, 8), title='Differenced Student Performance Metrics')
+plt.show()
+```
+
+### Log Transformation
+```
+
+import numpy as np
+
+df['Attendance_log'] = np.log(df['Attendance'])
+df['StudyHours_log'] = np.log(df['StudyHours'])
+df['PreviousGrade_log'] = np.log(df['PreviousGrade'])
+df['FinalGrade_log'] = np.log(df['FinalGrade'])
+
+df[['Attendance_log', 'StudyHours_log', 'PreviousGrade_log', 'FinalGrade_log']].plot(subplots=True, layout=(2, 2), figsize=(10, 8), title='Log-Transformed Student Performance Metrics')
+plt.show()
+```
+# Seasonality Removal
+```
+
+
+rolling_mean_window = 2
+
+df['Attendance_detrended'] = df['Attendance'] - df['Attendance'].rolling(window=rolling_mean_window).mean()
+df['StudyHours_detrended'] = df['StudyHours'] - df['StudyHours'].rolling(window=rolling_mean_window).mean()
+df['PreviousGrade_detrended'] = df['PreviousGrade'] - df['PreviousGrade'].rolling(window=rolling_mean_window).mean()
+df['FinalGrade_detrended'] = df['FinalGrade'] - df['FinalGrade'].rolling(window=rolling_mean_window).mean()
+
+df[['Attendance_detrended', 'StudyHours_detrended', 'PreviousGrade_detrended', 'FinalGrade_detrended']].plot(subplots=True, layout=(2, 2), figsize=(10, 8), title='Detrended Student Performance Metrics')
+plt.show()
+````
+
+
+
+
+
 ### OUTPUT:
-
-![Screenshot 2024-09-18 095002](https://github.com/user-attachments/assets/c7a674d4-1554-4a24-88e7-cfb0463cbdbc)
-
-
-REGULAR DIFFERENCING:
-
-![Screenshot 2024-09-18 095009](https://github.com/user-attachments/assets/f1513d43-5e2a-4d7a-938c-3ec0e55c0b3e)
-
-
-SEASONAL ADJUSTMENT:
-
-![Screenshot 2024-09-18 095019](https://github.com/user-attachments/assets/b87d10c2-5955-4899-a62b-32d1576fd033)
-
-
-LOG TRANSFORMATION:
-![Screenshot 2024-09-18 095026](https://github.com/user-attachments/assets/35482aaa-eb71-4e3d-8eee-7ae50059fdf6)
-
+# REGULAR DIFFERENCING:
+![download](https://github.com/user-attachments/assets/b53ace7f-0c18-4931-9373-6d799be97748)
+# SEASONAL ADJUSTMENT:
+![download](https://github.com/user-attachments/assets/2d3e2a61-4c78-4760-8197-bdd5caca9620)
+# LOG TRANSFORMATION:
+![download](https://github.com/user-attachments/assets/629dee6a-6a32-4f7d-beec-33ed0ed5e70d)
 
 
 ### RESULT:
-Thus we have created the python code for the conversion of non stationary to stationary data on mulgrave river
+Thus  have created the python code for the conversion of non stationary to stationary data on student performance.
 data.
